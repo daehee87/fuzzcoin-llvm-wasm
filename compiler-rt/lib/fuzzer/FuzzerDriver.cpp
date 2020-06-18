@@ -748,7 +748,19 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
 
 //{{ fuzzcoin
   Options.pofw_seed = Seed;
+
+  // synchronize edge coverage from master.
+  char idx[32];
+
+  // Options, TPC class is declared as global
+  for (unsigned int i = 0; i < TPC.getNumModules(); i++) {
+    memset(idx, 0, 32);
+    snprintf(idx, 32, "%u", i);
+    std::string Path = DirPlusFile(Options.CurrentCoverageDir, idx);
+    TPC.syncModules(Path, i);
+  }
 //}} fuzzcoin
+
 
 
   Random Rand(Seed);

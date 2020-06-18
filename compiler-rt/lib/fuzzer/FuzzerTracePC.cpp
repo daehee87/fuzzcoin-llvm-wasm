@@ -22,6 +22,7 @@
 #include "FuzzerUtil.h"
 #include "FuzzerValueBitMap.h"
 #include <set>
+#include <fstream>
 
 // Used by -fsanitize-coverage=stack-depth to track stack depth
 ATTRIBUTES_INTERFACE_TLS_INITIAL_EXEC uintptr_t __sancov_lowest_stack;
@@ -35,6 +36,12 @@ size_t TracePC::GetTotalPCCoverage() {
 }
 
 //{{ added for fuzzcoin
+void TracePC::syncModules(std::string Path, unsigned int i){
+    std::ifstream T(Path, std::ios::binary);
+    T.seekg(0, T.beg);
+    T.read(reinterpret_cast<char *>(Modules[i].Start()), Modules[i].Size());
+}
+
 void TracePC::DumpCoveragesToFile(FuzzingOptions Options){
     char idx[32];
     for (unsigned int i = 0; i < NumModules; i++) {

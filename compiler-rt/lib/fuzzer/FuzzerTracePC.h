@@ -140,6 +140,11 @@ class TracePC {
   static uintptr_t GetNextInstructionPc(uintptr_t PC);
   bool PcIsFuncEntry(const PCTableEntry *TE) { return TE->PCFlags & 1; }
 
+//{{ added for fuzzcoin
+  size_t getNumModules(){ return NumModules; }
+  void syncModules(std::string Path, unsigned int i);
+//}}
+
 private:
   bool UseCounters = false;
   uint32_t UseValueProfileMask = false;
