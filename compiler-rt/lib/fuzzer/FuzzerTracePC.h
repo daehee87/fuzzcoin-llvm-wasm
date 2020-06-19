@@ -143,6 +143,7 @@ class TracePC {
 //{{ added for fuzzcoin
   size_t getNumModules(){ return NumModules; }
   void syncModules(std::string Path, unsigned int i);
+  bool CompareCoverage();
 //}}
 
 private:
@@ -172,6 +173,23 @@ private:
   };
 
   Module Modules[4096];
+
+
+  //{{ added for fuzzcoin
+  struct GlobalModule {
+    uint8_t* array;	// initialize in Inline8bitCounterInit.
+    uint8_t size;
+
+    uint8_t *Start() { return array; }
+    uint8_t *Stop() { return (array+size); }
+    uint8_t Size() { return size; }
+
+  };
+
+  GlobalModule GlobalModules[4096];		// initialized in FuzzerDriver
+  //}}
+
+
   size_t NumModules;  // linker-initialized.
   size_t NumInline8bitCounters;
 

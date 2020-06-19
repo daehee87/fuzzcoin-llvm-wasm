@@ -95,6 +95,11 @@ private:
   void InterruptCallback();
   void MutateAndTestOne();
   void PurgeAllocator();
+
+  //{{ added for fuzzcoin
+  void CheckGlobalCoverageExpansion(const Unit &U);
+  //}}
+
   void ReportNewCoverage(InputInfo *II, const Unit &U);
   void PrintPulseAndReportSlowInput(const uint8_t *Data, size_t Size);
   void WriteUnitToFileWithPrefix(const Unit &U, const char *Prefix);

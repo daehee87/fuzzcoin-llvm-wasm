@@ -756,7 +756,7 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
   for (unsigned int i = 0; i < TPC.getNumModules(); i++) {
     memset(idx, 0, 32);
     snprintf(idx, 32, "%u", i);
-    std::string Path = DirPlusFile(Options.CurrentCoverageDir, idx);
+    std::string Path = DirPlusFile(Options.GlobalFeatureDir, idx);
     TPC.syncModules(Path, i);
   }
 //}} fuzzcoin

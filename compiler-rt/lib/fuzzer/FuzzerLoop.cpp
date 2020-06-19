@@ -640,6 +640,25 @@ void Fuzzer::PrintStatusForNewUnit(const Unit &U, const char *Text) {
   }
 }
 
+//{{ added for fuzzcoin
+void Fuzzer::CheckGlobalCoverageExpansion(const Unit &U){
+
+  // compare global and local coverage
+  bool is_expanded = TPC.CompareCoverage();
+
+  if(is_expanded){
+    // if this is globally new coverage, dump the current test case to coverages directory
+    std::string Path = DirPlusFile( Options.NewCoverageDir, 
+		    std::to_string(Options.NewInputId) );
+    WriteToFile(U, Path);
+
+    Options.NewInputId++;
+  }
+
+}
+//}}
+
+
 void Fuzzer::ReportNewCoverage(InputInfo *II, const Unit &U) {
   II->NumSuccessfullMutations++;
   MD.RecordSuccessfulMutationSequence();
@@ -648,6 +667,12 @@ void Fuzzer::ReportNewCoverage(InputInfo *II, const Unit &U) {
   NumberOfNewUnitsAdded++;
   CheckExitOnSrcPosOrItem(); // Check only after the unit is saved to corpus.
   LastCorpusUpdateRun = TotalNumberOfRuns;
+
+  //{{ added for fuzzcoin
+
+  CheckGlobalCoverageExpansion(U);
+
+  //}}
 }
 
 // Tries detecting a memory leak on the particular input that we have just

@@ -36,10 +36,36 @@ size_t TracePC::GetTotalPCCoverage() {
 }
 
 //{{ added for fuzzcoin
+
+bool TracePC::CompareCoverage(){
+
+  bool ret = false;
+
+  for (unsigned int k=0; k < NumModules; k++){
+
+    unsigned char* global = reinterpret_cast<unsigned char *>(GlobalModules[k].Start());
+    unsigned char* local = reinterpret_cast<unsigned char *>(Modules[k].Start());
+    size_t length = GlobalModules[k].Size();
+
+    bool is_expanded = false;
+    // see of the new coverage expands global (consider increment of value as expension)
+    for(int i=0; i<length; i++){
+      if(global[i] < local[i]){
+        is_expanded = true;
+        break;
+      }
+    }
+
+    ret = ret || is_expanded;
+  }
+
+  return ret;
+}
+
 void TracePC::syncModules(std::string Path, unsigned int i){
     std::ifstream T(Path, std::ios::binary);
     T.seekg(0, T.beg);
-    T.read(reinterpret_cast<char *>(Modules[i].Start()), Modules[i].Size());
+    T.read(reinterpret_cast<char *>(GlobalModules[i].Start()), GlobalModules[i].Size());
 }
 
 void TracePC::DumpCoveragesToFile(FuzzingOptions Options){
@@ -47,7 +73,7 @@ void TracePC::DumpCoveragesToFile(FuzzingOptions Options){
     for (unsigned int i = 0; i < NumModules; i++) {
         memset(idx, 0, 32);
         snprintf(idx, 32, "%u", i);
-        std::string Path = DirPlusFile(Options.CurrentCoverageDir, idx);
+        std::string Path = DirPlusFile(Options.GlobalFeatureDir, idx);
         WriteToFile( Unit(Modules[i].Start(),
                             Modules[i].Stop()), Path);
     }
@@ -103,6 +129,11 @@ void TracePC::HandleInline8bitCountersInit(uint8_t *Start, uint8_t *Stop) {
     return;
   assert(NumModules <
          sizeof(Modules) / sizeof(Modules[0]));
+
+  //{{ added for fuzzcoin
+  auto &GM = GlobalModules[NumModules];
+  //}}
+
   auto &M = Modules[NumModules++];
   uint8_t *AlignedStart = RoundUpByPage(Start);
   uint8_t *AlignedStop  = RoundDownByPage(Stop);
@@ -113,6 +144,15 @@ void TracePC::HandleInline8bitCountersInit(uint8_t *Start, uint8_t *Stop) {
   M.NumRegions = NumFullPages + NeedFirst + NeedLast;;
   assert(M.NumRegions > 0);
   M.Regions = new Module::Region[M.NumRegions];
+
+
+  //{{ added for fuzzcoin
+  
+  GM.size = (size_t)(Stop - Start);
+  GM.array = new uint8_t[ GM.size ];
+  
+  //}}
+
   assert(M.Regions);
   size_t R = 0;
   if (NeedFirst)
@@ -121,6 +161,8 @@ void TracePC::HandleInline8bitCountersInit(uint8_t *Start, uint8_t *Stop) {
     M.Regions[R++] = {P, P + PageSize(), true, true};
   if (NeedLast)
     M.Regions[R++] = {AlignedStop, Stop, true, false};
+
+
   assert(R == M.NumRegions);
   assert(M.Size() == (size_t)(Stop - Start));
   assert(M.Stop() == Stop);

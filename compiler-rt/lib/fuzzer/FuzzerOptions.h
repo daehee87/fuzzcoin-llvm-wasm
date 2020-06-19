@@ -60,10 +60,14 @@ struct FuzzingOptions {
 
 
   //{{ added for fuzzcoin
-  std::string CurrentInputPath = ".cur_input";  // same as AFL
-  std::string CurrentCoverageDir = "features";  // tmp dir to dump out the feature as we want
+  
+  std::string CurrentInputPath = ".cur_input";   // same as AFL
+  std::string NewCoverageDir = "coverages";      // output directory for globally new coverage
+  std::string GlobalFeatureDir = "features";     // global coverage state for initial sync
+  //std::string CheckerScriptPath = "./checker.py"; // coverage expansion checker
   std::string PofwPath = "pofw";
   std::string LogPath = ".cur_runs";
+  unsigned int NewInputId = 0; 			// index counter for newly found coverages.
   unsigned int PofwSlowdownThreashHold = 10000; // calculate PoFW for this amount of initial iteration
   unsigned int PofwSlowdownRate = 10;           // calculates PoFW once this iteration
   unsigned pofw_seed = 0;                       // initialize this from FuzzDriver.cpp, then use it for PoFW
