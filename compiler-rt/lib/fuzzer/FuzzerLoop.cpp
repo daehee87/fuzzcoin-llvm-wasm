@@ -651,6 +651,7 @@ void Fuzzer::CheckGlobalCoverageExpansion(const Unit &U){
     std::string Path = DirPlusFile( Options.NewCoverageDir, 
 		    std::to_string(Options.NewInputId) );
     WriteToFile(U, Path);
+    TPC.DumpCoveragesToFile( Options );
 
     Options.NewInputId++;
   }

@@ -23,6 +23,8 @@
 #include "FuzzerValueBitMap.h"
 #include <set>
 #include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 // Used by -fsanitize-coverage=stack-depth to track stack depth
 ATTRIBUTES_INTERFACE_TLS_INITIAL_EXEC uintptr_t __sancov_lowest_stack;
@@ -74,8 +76,36 @@ void TracePC::DumpCoveragesToFile(FuzzingOptions Options){
         memset(idx, 0, 32);
         snprintf(idx, 32, "%u", i);
         std::string Path = DirPlusFile(Options.GlobalFeatureDir, idx);
-        WriteToFile( Unit(Modules[i].Start(),
-                            Modules[i].Stop()), Path);
+
+	// read first
+	// Use raw C interface because this function may be called from a sig handler.
+	size_t fsize = Modules[i].Size();
+	FILE *fp = fopen(Path.c_str(), "rb");
+	if (!fp) return;
+
+	unsigned char* Data = (unsigned char*)malloc(fsize);
+	fread(Data, 1, fsize, fp);
+	fclose(fp);
+
+	// current coverage
+	unsigned char* current = Modules[i].Start();
+
+	// open for write this time.
+	fp = fopen(Path.c_str(), "wb");
+
+	// update coverage
+	for (unsigned int k = 0; k<fsize; k++){
+		// select higher coverage.
+		if(Data[k] < current[k])
+			Data[k] = current[k];
+	}
+	
+	// commit update.
+	fwrite(Data, 1, fsize, fp);
+	fclose(fp);
+
+	// free memory
+	free(Data);
     }
 }
 
