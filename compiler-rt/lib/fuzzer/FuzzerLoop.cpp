@@ -566,14 +566,15 @@ void Fuzzer::ExecuteCallback(const uint8_t *Data, size_t Size) {
     }
 
     if( (TotalNumberOfRuns % divisor) == 0 ){
-        FILE* tmpfp0 = fopen(Options.LogPath.c_str(), "w");
-        if(tmpfp0!=NULL){
-          fprintf(tmpfp0, "%u\n", TotalNumberOfRuns);
-          fclose(tmpfp0);
-        }
-        else{
-          Printf("[ERROR] fopen for log failed\n");
-        }
+        //FILE* tmpfp0 = fopen(Options.LogPath.c_str(), "w");
+        //if(tmpfp0!=NULL){
+          //fprintf(tmpfp0, "%u\n", TotalNumberOfRuns);
+          //fclose(tmpfp0);
+	  Printf("[FUZZCOIN] current runs=%u\n", TotalNumberOfRuns);
+        //}
+        //else{
+        //  Printf("[ERROR] fopen for log failed\n");
+        //}
     }
 
     std::string exec_hash = TPC.GetExecutionHash(Options.pofw_seed);
